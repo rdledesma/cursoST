@@ -86,10 +86,9 @@ class Geo:
         
         self.ktrp = self.getKtrp()
         
-        self.ktrp2 = 0.649 + 0.02 * self.altura ** 0.28
         
         self.df['GHIargp'] = list(map(self.generateGHIargp, self.df.TOA, self.df.Mak))
-        self.df['GHIargp2'] = self.generateGHIargp_2(self.df)
+        # # self.df['GHIargp_2'] = self.generateGHIargp_2(self.df)
         
     def getKtrp(self):
         if(self.altura>1000):
@@ -302,7 +301,7 @@ class Geo:
         result = []
         for i, val in enumerate(GHI):
             try:
-                result.append(GHI[i] * math.pow( self.ktrp2 ,math.pow(AM[i], 0.678)))
+                result.append(GHI[i] * math.pow( self.ktrp_2 ,math.pow(AM[i], 0.678)))
             except Exception:
                 result.append(0)
         return result
@@ -311,15 +310,22 @@ class Geo:
     def to_csv(self, name):
         self.df.to_csv(name+".csv")
 
+'''
+full = pd.date_range(
+    start="2018/01/01 00:00", 
+    end="2018/12/31 23:59",
+    freq="1 min")
 
-# full = pd.date_range(
-#     start="2018/01/01 00:00", 
-#     end="2018/12/31 23:59",
-#     freq="1 min")
 
 
-# dfGeo = Geo.Geo(full, 
-#                 lat=-22.7218, 
-#                 long= -65.8990, 
-#                 gmt = 0,
-#                 alt = 3487, beta = 0).df
+dfGeo = Geo(full, 
+                lat=-22.7218, 
+                long= -65.8990, 
+                gmt = -3,
+                alt = 3487, beta = 0).df
+
+#%%
+import matplotlib.pyplot as plt
+
+plt.plot(dfGeo.Fecha, dfGeo.GHIargp)
+plt.plot(dfGeo.Fecha, dfGeo.TOA)'''
