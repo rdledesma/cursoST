@@ -10,22 +10,24 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import Geo
 import NollasQC
-from scipy.optimize import curve_fit
+from datetime import timedelta
 %matplotlib qt
 
-d = pd.read_csv('measured/BDDsla_2024.csv')
+d = pd.read_csv('measured/BDD_sla_2023.csv')
 d['TIMESTAMP'] = pd.to_datetime(d.TIMESTAMP)
 
 
-df = d[['TIMESTAMP', 'ghiPSP']].copy()
-#df['ghi'] = df.PSP_Avg/1000/7.50e-6
-df.columns = ['TIMESTAMP', 'ghi']
+df = d[['TIMESTAMP', 'PSP_Avg']].copy()
+df['ghi'] = df.PSP_Avg/1000/7.50e-6
+df.columns = ['TIMESTAMP', 'PSP_Avg', 'ghi']
+
+df['TIMESTAMP'] = df['TIMESTAMP'] + timedelta(hours=3)
 
 dfGeo = Geo.Geo(df.TIMESTAMP, 
-                lat= -24.72, 
-                long= -65.41,
-                gmt = -3,
-                alt = 1234  , beta = 0).df
+                lat= -24.72888, #-24.72888
+                long= -65.40979,#  -65.40979
+                gmt = 0,
+                alt = 1234  , beta = 0).df # 3348  #1190
 
 df['CTZ'] = dfGeo.CTZ
 df['SZA'] = dfGeo.SZA
@@ -44,9 +46,17 @@ df.loc[
 ] = False
 
 
-plt.plot(df.TIMESTAMP, df.ghi, '--')
-plt.plot(df.TIMESTAMP[df.Acepted == True], df.ghi[df.Acepted == True], '.')
+df = df[df.CTZ > 0.17]
 
-df.to_csv('BDDsla2024_NQC.csv', index=False)
+plt.plot(df.TIMESTAMP, df.ghi, '--')
+plt.plot(df.TIMESTAMP[df.Acepted == True], df.ghi[df.Acepted == True], '.-')
+
+plt.plot(df.CTZ[df.Acepted == True], df.ghi[df.Acepted == True], '.', ms=0.5)
+
+plt.plot(df.CTZ[df.Acepted == True], df.ghi[df.Acepted == True]/df.TOA[df.Acepted == True], '.', ms=0.5)
+
+
+
+#df.to_csv('BDDsla2023_NQC.csv', index=False)
 
 #%% EJEMPLO DE SKLEARN DE SENSio
