@@ -19,7 +19,7 @@ varsRegs = ['TOA', 'Clear sky GHI', 'Clear sky BHI', 'Clear sky DHI',
 
 
 
-
+import numpy as np
 
 X = dTrain[varsRegs].values
 y = dTrain.ghi.values
@@ -46,16 +46,16 @@ model.add(Dense(16, activation='relu'))
 model.add(Dense(1, activation='relu'))
 
 
-print(model.summary())
+
 
 model.compile(loss='mse', optimizer='adam')# train the model
 
-
-
-
-
 # Ajustar el modelo y registrar la pérdida
 history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=100, epochs=50)
+
+
+
+
 
 # Graficar la función de pérdida
 plt.figure(figsize=(10, 5))
@@ -71,6 +71,75 @@ plt.show()
 
 
 
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import Adam
+from sklearn.metrics import mean_squared_error
+
+# Definir función para crear y entrenar el modelo
+def create_and_train_model(X_train, y_train, X_test, y_test, layers, dropout_rate, modelname, epochs=400, batch_size=80, ):
+    print(f"modelo {modelname} ")
+    model = Sequential()
+    model.add(Dense(layers[0], input_shape=(X_train.shape[1],), activation='relu'))
+    for layer_size in layers[1:]:
+        model.add(Dense(layer_size, activation='relu'))
+        model.add(Dropout(dropout_rate))
+    model.add(Dense(1, activation='linear'))
+    model.compile(loss='mse', optimizer=Adam())
+    
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=batch_size, epochs=epochs, verbose=1)
+    
+    y_pred = model.predict(X_test)
+    rrmse = np.sqrt(mean_squared_error(y_test, y_pred)) / np.mean(y_test) * 100
+    
+    joblib.dump(model, f"models/{modelname}{modelname}")
+    
+    return history, rrmse
+
+# Configuraciones de modelos para probar
+configurations = [
+    #{"layers": [2, 8, 16], "dropout_rate": 0.5},
+    #{"layers": [4, 16, 32], "dropout_rate": 0.5},
+    #{"layers": [8, 32, 64], "dropout_rate": 0.5},
+    #{"layers": [16, 64, 128], "dropout_rate": 0.5},
+    #{"layers": [32, 128, 256], "dropout_rate": 0.5},
+    #{"layers": [32*2, 128*2, 256*2], "dropout_rate": 0.5},
+    {"layers": [32*3, 128*3, 256*3], "dropout_rate": 0.5},
+    #{"layers": [32*4, 128*4, 256*4], "dropout_rate": 0.5},
+    #{"layers": [32*5, 128*5, 256*5], "dropout_rate": 0.5}
+]
+
+# Variables para almacenar los resultados
+histories = []
+rrmses = []
+
+# Entrenar modelos con diferentes configuraciones
+for i, config in enumerate(configurations):
+    history, rrmse = create_and_train_model(X_train, y_train, X_test, y_test, config["layers"], config["dropout_rate"], modelname=f"model_{i}")
+    histories.append(history)
+    rrmses.append(rrmse)
+    print(f'Configuración: {config}, RRMSE: {rrmse}')
+
+# Graficar las funciones de pérdida
+plt.figure(figsize=(12, 8))
+for i, history in enumerate(histories):
+    plt.plot(history.history['loss'], label=f'Entrenamiento {i+1} ({configurations[i]})')
+    plt.plot(history.history['val_loss'], label=f'Validación {i+1} ({configurations[i]})')
+plt.xlabel('Épocas')
+plt.ylabel('Pérdida (MSE)')
+plt.title('Función de Pérdida durante el Entrenamiento y la Validación para Diferentes Configuraciones')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Mostrar RRMSE para cada configuración
+for i, rrmse in enumerate(rrmses):
+    print(f'Configuración {i+1} ({configurations[i]} RRMSE = {rrmse}')
 
 
 
