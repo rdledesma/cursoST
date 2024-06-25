@@ -10,15 +10,25 @@ import pandas as pd
 import joblib
 import Metrics as m
 
-model = joblib.load('models/MLP.joblib')
+import numpy as np
+model = joblib.load('models/model_1.joblib')
 
 
 dTest = pd.read_csv('process/test.csv')
 
 
 dTest['GHI'] = dTest.GHI * 60
-dTest['DHI'] = dTest.DHI * 60
-X = dTest[['GHI','DHI','AOD OR','Cloud coverage']].values
+varsRegs = ['TOA', 'Clear sky GHI', 'Clear sky BHI', 'Clear sky DHI',
+       'Clear sky BNI', 'GHI', 'BHI', 'DHI', 'BNI', 'Reliability', 'sza',
+       'summer/winter split', 'tco3', 'tcwv', 'AOD BC', 'AOD DU', 'AOD SS',
+       'AOD OR', 'AOD SU', 'AOD NI', 'AOD AM', 'AOD SO', 'Snow probability',
+       'fiso', 'fvol', 'fgeo', 'albedo', 'Cloud coverage', 'Cloud type']
+
+
+
+
+X = dTest[varsRegs].values
+y = dTest.ghi.values
 
 scaler = joblib.load('models/scaler.joblib')
 
@@ -36,7 +46,6 @@ y_test = dTest.ghi.values
 dTest['pred'] = model.predict(X_test)
 
 
-
 trueTest = dTest.ghi.values
 predTest = dTest.pred.values
 camsTest = dTest.GHI.values
@@ -51,3 +60,4 @@ plt.plot(dTest.ghi)
 plt.plot(dTest.GHI)
 plt.plot(dTest.pred)
 plt.show()
+
