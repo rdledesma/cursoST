@@ -77,7 +77,7 @@ configurations = [
     {"layers": [2, 8, 16], "dropout_rate": 0.3},
     {"layers": [4, 16, 32], "dropout_rate": 0.3},
     {"layers": [8, 32, 64], "dropout_rate": 0.3},
-    # {"layers": [16, 64, 128], "dropout_rate": 0.3},
+    {"layers": [16, 8, 2], "dropout_rate": 0.3},
     #{"layers": [32, 128, 256], "dropout_rate": 0.3},
 ]
 
